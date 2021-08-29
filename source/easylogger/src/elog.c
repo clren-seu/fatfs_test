@@ -252,6 +252,9 @@ void elog_stop(void) {
         return ;
     }
 
+    /* show version */
+    log_i("EasyLogger V%s is deinitialize success.", ELOG_SW_VERSION);
+
     /* disable output */
     elog_set_output_enabled(false);
 
@@ -261,8 +264,6 @@ void elog_stop(void) {
     elog_buf_enabled(false);
 #endif
 
-    /* show version */
-    log_i("EasyLogger V%s is deinitialize success.", ELOG_SW_VERSION);
 }
 
 
