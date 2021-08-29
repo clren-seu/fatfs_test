@@ -1,42 +1,35 @@
-ifdef BUILDDIR
-override BUILDDIR := $(BUILDDIR)/
-$(shell mkdir -p $(BUILDDIR))
+TOP_DIR := $(shell pwd)
+
+# 配置输出文件位置
+BUILD_DIR := $(TOP_DIR)/out/
+# 配置目标
+TARGET := fatfs
+# 编译的目录名
+SUBDIRS := test fatfs_src easylogger
+# 全局包含的头文件
+GLOBAL_INCLUDE := $(TOP_DIR)/easylogger/inc
+
+CC := gcc
+LD := ld
+
+NO_ECHO := @
+
+ifeq ($(BUILD_DIR),)
+BUILD_DIR := $(TOP_DIR)/
 endif
+LIB_MODS := $(foreach n,$(SUBDIRS),$(BUILD_DIR)$(n)/lib_$(n)_mod.o)
+TARGET := $(BUILD_DIR)$(TARGET)
+GLOBAL_INCLUDE := $(addprefix -I,$(GLOBAL_INCLUDE))
 
-# 输出程序名
-TARGET := fatfs_test
-TARGET := $(addprefix $(BUILDDIR), $(TARGET))
+export NO_ECHO GLOBAL_INCLUDE TOP_DIR BUILD_DIR CC LD
 
-# 编译相关工具
-BUILD_PREFIX :=
-CC   := $(BUILD_PREFIX)gcc
-SIZE := $(BUILD_PREFIX)size
-NM   := $(BUILD_PREFIX)nm
+.PHONY: all $(SUBDIRS) clean
+all: $(SUBDIRS)
+	$(NO_ECHO)mkdir -p $(dir $(TARGET))
+	$(NO_ECHO)$(CC) -o $(TARGET) $(LIB_MODS)
 
-export CC
+$(SUBDIRS):
+	$(NO_ECHO)make -C $@ $(MAKECMDGOALS)
 
-SRC := $(wildcard *.c)
-OBJ := $(SRC:%.c=$(BUILDDIR)%.o)
-DEP := $(SRC:%.c=$(BUILDDIR)%.d)
-
-CFLAGS := -I.
-
-.PHONY: all
-all: $(TARGET)
-
-# rules
--include $(DEP)
-.SUFFIXES:
-
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) $^ $(LFLAGS) -o $@
-
-$(BUILDDIR)%.o: %.c
-	$(CC) -c -MMD $(CFLAGS) $< -o $@
-
-$(BUILDDIR)%.s: %.c
-	$(CC) -S $(CFLAGS) $< -o $@
-
-.PHONY: clean
-clean:
-	rm -fr $(TARGET) $(OBJ) $(DEP)
+clean: $(SUBDIRS)
+	$(NO_ECHO)rm -fr $(TARGET)
