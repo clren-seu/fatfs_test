@@ -8,6 +8,8 @@ TARGET := fatfs
 SUBDIRS := test fatfs_src easylogger
 # 全局包含的头文件
 GLOBAL_INCLUDE := $(TOP_DIR)/easylogger/inc
+# gdb
+CFLAGS := -Og
 
 CC := gcc
 LD := ld
@@ -21,7 +23,7 @@ LIB_MODS := $(foreach n,$(SUBDIRS),$(BUILD_DIR)$(n)/lib_$(n)_mod.o)
 TARGET := $(BUILD_DIR)$(TARGET)
 GLOBAL_INCLUDE := $(addprefix -I,$(GLOBAL_INCLUDE))
 
-export NO_ECHO GLOBAL_INCLUDE TOP_DIR BUILD_DIR CC LD
+export NO_ECHO GLOBAL_INCLUDE TOP_DIR BUILD_DIR CC LD CFLAGS
 
 .PHONY: all $(SUBDIRS) clean
 all: $(SUBDIRS)

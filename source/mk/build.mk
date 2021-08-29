@@ -25,7 +25,7 @@ $(SUBDIRS):
 	$(NO_ECHO)make -C $@ $(MAKECMDGOALS)
 
 $(OBJ_DIR)%.o:%.c
-	$(NO_ECHO)$(CC) $(GLOBAL_INCLUDE) $(MODULE_INCLUDE) -c $< -o $@
+	$(NO_ECHO)$(CC) $(GLOBAL_INCLUDE) $(MODULE_INCLUDE) $(CFLAGS) -c $< -o $@
 
 clean: $(SUBDIRS)
 	$(NO_ECHO)rm -fr $(SRC_OBJS) $(MODULE)
