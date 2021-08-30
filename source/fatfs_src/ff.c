@@ -22,6 +22,7 @@
 #include <string.h>
 #include "ff.h"			/* Declarations of FatFs API */
 #include "diskio.h"		/* Declarations of device I/O functions */
+#include "elog.h"
 
 
 /*--------------------------------------------------------------------------
@@ -5672,6 +5673,8 @@ static FRESULT create_partition (
 	/* Get physical drive size */
 	if (disk_ioctl(drv, GET_SECTOR_COUNT, &sz_drv) != RES_OK) return FR_DISK_ERR;
 
+    log_d("sector count: %u", sz_drv);
+
 #if FF_LBA64
 	if (sz_drv >= FF_MIN_GPT) {	/* Create partitions in GPT format */
 		WORD ss;
@@ -5760,6 +5763,8 @@ static FRESULT create_partition (
 		n_sc = N_SEC_TRACK;				/* Determine drive CHS without any consideration of the drive geometry */
 		for (n_hd = 8; n_hd != 0 && sz_drv32 / n_hd / n_sc > 1024; n_hd *= 2) ;
 		if (n_hd == 0) n_hd = 255;		/* Number of heads needs to be <256 */
+
+        log_d("n_hd: %d, n_sc: %d", n_hd, n_sc);
 
 		memset(buf, 0, FF_MAX_SS);		/* Clear MBR */
 		pte = buf + MBR_Table;	/* Partition table in the MBR */
@@ -6308,7 +6313,6 @@ FRESULT f_fdisk (
 {
 	BYTE *buf = (BYTE*)work;
 	DSTATUS stat;
-
 
 	stat = disk_initialize(pdrv);
 	if (stat & STA_NOINIT) return FR_NOT_READY;

@@ -1,12 +1,8 @@
-#define LOG_TAG    "main"
-
-#include <elog.h>
-
-
 #include <stdio.h>
 
 #include "ff.h"
 #include "diskio.h"
+#include "elog.h"
 
 static FATFS fatfs;
 extern char buf[1024 *1024 * 512];
@@ -17,6 +13,36 @@ PARTITION VolToPart[FF_VOLUMES] = {
 	{1, 0}	   /* "2:" ==> PD#1 as removable drive */
 };
 
+static void log_init(void)
+{
+    elog_init();
+    /* set EasyLogger log format */
+	
+    elog_set_fmt(ELOG_LVL_ASSERT, ELOG_FMT_LVL | ELOG_FMT_DIR | ELOG_FMT_LINE | ELOG_FMT_FUNC);
+    elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_LVL | ELOG_FMT_DIR | ELOG_FMT_LINE | ELOG_FMT_FUNC);
+    elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL | ELOG_FMT_DIR | ELOG_FMT_LINE | ELOG_FMT_FUNC);
+    elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL | ELOG_FMT_DIR | ELOG_FMT_LINE | ELOG_FMT_FUNC);
+    elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_LVL | ELOG_FMT_DIR | ELOG_FMT_LINE | ELOG_FMT_FUNC);
+    elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_LVL | ELOG_FMT_DIR | ELOG_FMT_LINE | ELOG_FMT_FUNC);
+
+	elog_start();
+
+    /* dynamic set enable or disable for output logs (true or false) */
+//    elog_set_output_enabled(false);
+    /* dynamic set output logs's level (from ELOG_LVL_ASSERT to ELOG_LVL_VERBOSE) */
+    elog_set_filter_lvl(ELOG_LVL_DEBUG);
+    /* dynamic set output logs's filter for tag */
+//    elog_set_filter_tag("main");
+    /* dynamic set output logs's filter for keyword */
+//    elog_set_filter_kw("Hello");
+    /* dynamic set output logs's tag filter */
+//    elog_set_filter_tag_lvl("main", ELOG_LVL_WARN);
+}
+
+static void log_deinit(void)
+{
+    elog_stop();
+}
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +51,7 @@ int main(int argc, char *argv[])
     UINT bw;            /* Bytes written */
     BYTE work[FF_MAX_SS]; /* Work area (larger is better for processing time) */
 
+    log_init();
 	
 	LBA_t plist[] = {50, 50, 0};  /* Divide the drive into two partitions */
 				 /* {0x10000000, 100}; 256M sectors for 1st partition and left all for 2nd partition */
@@ -66,12 +93,12 @@ int main(int argc, char *argv[])
 	}
 
     /* Write a message */
-    f_write(&fil, "Hello, World!\r\n", 15, &bw);
+    f_write(&fil, "Hello, World!", 13, &bw);
 
 	f_lseek(&fil, 0);
 
 	f_read(&fil, buf, 15, &bw);
-	printf("%s, %d\n", buf, bw);
+	log_v("%s, %d", buf, bw);
 
     /* Close the file */
     f_close(&fil);
@@ -91,36 +118,16 @@ int main(int argc, char *argv[])
 
 	fclose(fp);*/
 
-	elog_init();
-    /* set EasyLogger log format */
-	
-    elog_set_fmt(ELOG_LVL_ASSERT, ELOG_FMT_LVL | ELOG_FMT_TAG);
-    elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_LVL | ELOG_FMT_TAG);
-    elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL | ELOG_FMT_TAG);
-    elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL | ELOG_FMT_TAG);
-    elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_LVL | ELOG_FMT_TAG);
-    elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_LVL | ELOG_FMT_TAG);
-
-	elog_start();
 
 
-	log_a("Hello EasyLogger!");
-        log_e("Hello EasyLogger!");
-        log_w("Hello EasyLogger!");
-        log_i("Hello EasyLogger!");
-        log_d("Hello EasyLogger!");
-        log_v("Hello EasyLogger!");
+  /*  log_a("Hello EasyLogger!");
+    log_e("Hello EasyLogger!");
+    log_w("Hello EasyLogger!");
+    log_i("Hello EasyLogger!");
+    log_d("Hello EasyLogger!");
+    log_v("Hello EasyLogger!");*/
 
-    /* dynamic set enable or disable for output logs (true or false) */
-//    elog_set_output_enabled(false);
-    /* dynamic set output logs's level (from ELOG_LVL_ASSERT to ELOG_LVL_VERBOSE) */
-//    elog_set_filter_lvl(ELOG_LVL_WARN);
-    /* dynamic set output logs's filter for tag */
-//    elog_set_filter_tag("main");
-    /* dynamic set output logs's filter for keyword */
-//    elog_set_filter_kw("Hello");
-    /* dynamic set output logs's tag filter */
-//    elog_set_filter_tag_lvl("main", ELOG_LVL_WARN);
+    log_deinit();
 
 	return 0;
 }
