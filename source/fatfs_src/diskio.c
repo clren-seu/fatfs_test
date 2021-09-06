@@ -62,7 +62,7 @@ DSTATUS disk_initialize (
 	case DEV_RAM :
 		//printf("%s\n", __FUNCTION__);
 		if (g_status != 0) {
-			fd = open("virtdisk.img", O_RDWR);
+			fd = open("test.vhd", O_RDWR);
 			if (fd < 0) {
 				printf("fopen vir eror\n");
 			}
@@ -168,7 +168,7 @@ DRESULT disk_ioctl (
 	switch (pdrv) {
 	case DEV_RAM :
 		if (GET_SECTOR_COUNT == cmd) {
-			*(LBA_t *)buff = 10000;
+			*(LBA_t *)buff = 5000000;
 		}
 		res = RES_OK;
 		return res;

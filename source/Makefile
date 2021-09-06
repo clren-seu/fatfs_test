@@ -9,7 +9,7 @@ SUBDIRS := test fatfs_src easylogger
 # 全局包含的头文件
 GLOBAL_INCLUDE := $(TOP_DIR)/easylogger/inc
 # gdb
-CFLAGS := -Og
+CFLAGS := -g
 
 CC := gcc
 LD := ld

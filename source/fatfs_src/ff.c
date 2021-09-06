@@ -5828,11 +5828,15 @@ FRESULT f_mkfs (
 
 	/* Check mounted drive and clear work area */
 	vol = get_ldnumber(&path);					/* Get target logical drive */
+    log_d("vol: %d", vol);
 	if (vol < 0) return FR_INVALID_DRIVE;
 	if (FatFs[vol]) FatFs[vol]->fs_type = 0;	/* Clear the fs object if mounted */
 	pdrv = LD2PD(vol);			/* Physical drive */
 	ipart = LD2PT(vol);			/* Partition (0:create as new, 1..:get from partition table) */
+    log_d("pdrv: %d, ipart: %d", pdrv, ipart);
 	if (!opt) opt = &defopt;	/* Use default parameter if it is not given */
+    log_d("user mkfs_parm: fmt = %x, n_fat = %d, aligh = %u, n_root = %u, au_size = %lu",
+          opt->fmt, opt->n_fat, opt->align, opt->n_root, opt->au_size);
 
 	/* Get physical drive status (sz_drv, sz_blk, ss) */
 	ds = disk_initialize(pdrv);
@@ -5853,6 +5857,8 @@ FRESULT f_mkfs (
 	n_root = (opt->n_root >= 1 && opt->n_root <= 32768 && (opt->n_root % (ss / SZDIRE)) == 0) ? opt->n_root : 512;
 	sz_au = (opt->au_size <= 0x1000000 && (opt->au_size & (opt->au_size - 1)) == 0) ? opt->au_size : 0;
 	sz_au /= ss;	/* Byte --> Sector */
+    log_d("actual mkfs_parm: fmt = %x, n_fat = %d, n_root = %u, sz_au = %lu",
+          fsopt, n_fat, n_root, sz_au);
 
 	/* Get working buffer */
 	sz_buf = len / ss;		/* Size of working buffer [sector] */
